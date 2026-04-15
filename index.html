@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>OMR Scanner</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0A0F1C">
+    <meta name="description" content="Mobile-first OMR scanner with a clean fullscreen capture interface.">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="lib/lucide.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script async src="lib/opencv.js" type="text/javascript"></script>
+</head>
+<body class="cyber-theme" data-active-tab="scan">
+    <div id="success-flash" class="success-flash" aria-hidden="true"></div>
+    <header class="scan-topbar">
+        <div class="brand-block">
+            <span class="brand-name">OMR Scanner</span>
+        </div>
+        <div class="status-slot">
+            <button id="install-app-btn" class="btn-install" type="button" aria-label="Install app" hidden>
+                <i data-lucide="download"></i>
+            </button>
+            <div id="status-chip-container"></div>
+        </div>
+    </header>
+
+    <main id="app-content" class="app-shell">
+        <section id="tab-scan" class="tab-content active scanner-screen">
+            <div id="scan-trigger" class="camera-stage" role="button" tabindex="0" aria-label="Open camera">
+                <div class="camera-ambient"></div>
+                <video id="camera-preview" class="camera-preview" autoplay playsinline muted></video>
+                <canvas id="edge-overlay" class="edge-overlay" aria-hidden="true"></canvas>
+                <div id="preview-container" class="preview-container">
+                    <img id="image-preview" src="" alt="Captured sheet preview">
+                </div>
+                <div class="camera-scrim"></div>
+                <div class="scan-frame" aria-hidden="true">
+                    <div class="scan-frame-glow"></div>
+                    <div class="frame-corners">
+                        <span class="corner corner-tl"></span>
+                        <span class="corner corner-tr"></span>
+                        <span class="corner corner-bl"></span>
+                        <span class="corner corner-br"></span>
+                    </div>
+                    <div class="frame-copy">
+                        <span class="frame-status" id="frame-status-text">Ready to scan</span>
+                        <p id="frame-instruction-text">Align OMR sheet within frame</p>
+                    </div>
+                    <div class="laser-line"></div>
+                </div>
+            </div>
+
+            <input type="file" id="camera-input" accept="image/*" capture="environment" hidden>
+
+            <div class="floating-action-area">
+                <div class="control-card glass">
+                    <label class="field-label" for="student-id">Student ID</label>
+                    <input type="text" id="student-id" placeholder="Enter ID">
+                </div>
+                <div id="scan-actions" class="scan-actions active">
+                    <button id="upload-btn" class="btn-cyber-outline btn-icon-fab" type="button" aria-label="Upload image">
+                        <i data-lucide="image-up"></i>
+                    </button>
+                    <button id="final-scan-btn" class="btn-cyber-primary btn-scan-floating" type="button">
+                        <i data-lucide="scan-search"></i>
+                        Scan Now
+                    </button>
+                    <button id="flash-toggle-btn" class="btn-cyber-ghost btn-icon-fab" type="button" aria-pressed="false" aria-label="Flash toggle">
+                        <i data-lucide="flashlight-off"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-results" class="tab-content">
+            <div id="results-target">
+                <div class="card glass empty-state">
+                    <i data-lucide="file-warning"></i>
+                    <h2>No scans yet</h2>
+                    <p>Capture and process a sheet to view the report.</p>
+                </div>
+            </div>
+            <div class="card glass" style="margin-top: 1rem;">
+                <h2 class="section-title" style="margin-bottom: 0.75rem;">Past scans</h2>
+                <div class="results-search-wrap">
+                    <input id="past-scans-search" class="results-search-input" type="search" inputmode="search"
+                           placeholder="Search by Student ID" autocomplete="off" aria-label="Search past scans by Student ID">
+                    <button id="past-scans-search-clear" class="results-search-clear" type="button" aria-label="Clear search">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div id="past-scans-list" class="history-container"></div>
+            </div>
+            <button id="view-history-btn" class="btn-cyber-outline btn-full" type="button">
+                <i data-lucide="database"></i>
+                View history
+            </button>
+        </section>
+
+        <section id="tab-analytics" class="tab-content">
+            <div class="card glass">
+                <h2 class="section-title">Analytics</h2>
+                <div id="analytics-content" class="analytics-grid">
+                    <p class="date-subtext">Calculating scan trends...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-settings" class="tab-content">
+            <div id="tab-settings-container"></div>
+            <div id="settings-review-section" style="margin-top: 2rem;"></div>
+            <details id="history-log-section" class="card glass history-log" style="margin-top: 2rem;">
+                <summary class="section-title" style="cursor: pointer; padding: 1rem; list-style: none;">Edit history</summary>
+                <div id="history-list" style="padding: 1rem; border-top: 1px solid var(--surface-border);"></div>
+            </details>
+        </section>
+    </main>
+
+    <nav class="cyber-nav">
+        <a href="#" class="nav-item active" data-tab="scan" id="nav-scan" aria-label="Scan" title="Scan">
+            <i data-lucide="scan-line"></i>
+        </a>
+        <a href="#" class="nav-item" data-tab="results" id="nav-results" aria-label="Results" title="Results">
+            <i data-lucide="file-text"></i>
+        </a>
+        <a href="#" class="nav-item" data-tab="analytics" id="nav-analytics" aria-label="Analytics" title="Analytics">
+            <i data-lucide="chart-column"></i>
+        </a>
+        <a href="#" class="nav-item" data-tab="settings" id="nav-settings" aria-label="Settings" title="Settings">
+            <i data-lucide="sliders-horizontal"></i>
+        </a>
+    </nav>
+
+    <div id="history-modal" class="modal">
+        <div class="modal-content glass cyber-border">
+            <div class="modal-header">
+                <h2 class="section-title">Scan history</h2>
+                <div class="header-actions">
+                    <button id="print-history-btn" class="btn-icon" type="button">
+                        <i data-lucide="printer"></i>
+                    </button>
+                    <button id="export-csv-btn" class="btn-icon" type="button">
+                        <i data-lucide="download"></i>
+                    </button>
+                    <button id="clear-history-btn" class="btn-icon" type="button">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                    <button id="close-history" class="btn-close" type="button">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="history-container" class="history-container"></div>
+        </div>
+    </div>
+
+    <div id="capture-preview-modal" class="capture-modal">
+        <div class="capture-preview-shell">
+            <img id="capture-preview-image" src="" alt="Captured OMR preview">
+            <div class="capture-preview-scrim"></div>
+            <div class="capture-preview-actions">
+                <button id="modal-retake-btn" class="btn-cyber-ghost" type="button">
+                    <i data-lucide="rotate-ccw"></i>
+                    Retake
+                </button>
+                <button id="modal-confirm-btn" class="btn-cyber-primary" type="button">
+                    <i data-lucide="check"></i>
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="processing-section" class="processing-section">
+        <div id="spinner" class="cyber-loader"></div>
+
+        <div id="result-container" class="result-canvas-container" style="display: none;">
+            <div class="canvas-label">Optical verification</div>
+            <canvas id="canvas-original" class="output-canvas"></canvas>
+
+            <div id="image-details" class="image-details glass"></div>
+            <div id="bubble-count-pill" class="image-details glow-red" style="display: none;"></div>
+
+            <div id="results-mapping" class="results-mapping-container" style="display: none;">
+                <div class="canvas-label">Mapped answers</div>
+                <div id="answers-list" class="answers-list"></div>
+            </div>
+
+            <canvas id="canvas-grayscale" class="output-canvas hidden-cv"></canvas>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

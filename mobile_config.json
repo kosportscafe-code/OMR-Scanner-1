@@ -1,0 +1,70 @@
+{
+  "project_details": {
+    "app_id": "com.academy.omrscanner",
+    "app_name": "OMR Scanner",
+    "version": "1.0.0",
+    "version_code": 1,
+    "android_sdk": {
+      "min": 24,
+      "target": 34
+    },
+    "web_source_dir": "dist/",
+    "assets": {
+      "icon": {
+        "source": "res/icon_base.png",
+        "adaptive_foreground": "res/icon_fg.png",
+        "adaptive_background": "res/icon_bg.png",
+        "outputs": [
+          "mipmap-mdpi", "mipmap-hdpi", "mipmap-xhdpi", "mipmap-xxhdpi", "mipmap-xxxhdpi"
+        ]
+      },
+      "splash": {
+        "source": "res/splash_base.png",
+        "duration": 2500,
+        "fade_out": true,
+        "theme_bg": "#1a1a2e"
+      }
+    }
+  },
+  "android_permissions": [
+    {
+      "permission": "android.permission.CAMERA",
+      "required": true
+    },
+    {
+      "permission": "android.permission.READ_EXTERNAL_STORAGE",
+      "required": false
+    },
+    {
+      "permission": "android.permission.WRITE_EXTERNAL_STORAGE",
+      "required": false
+    },
+    {
+      "permission": "android.permission.VIBRATE",
+      "required": false
+    }
+  ],
+  "hardware_features": [
+    "android.hardware.camera"
+  ],
+  "native_plugin_registry": {
+    "image_processing": {
+      "id": "OpenCV MCP",
+      "implementation": "Native OpenCV C++ / WebAssembly Bridge",
+      "status": "REGISTERED"
+    },
+    "camera_access": {
+      "id": "Camera/File MCP",
+      "implementation": "Native Camera API / DOM File Intent",
+      "status": "REGISTERED"
+    },
+    "local_storage": {
+      "id": "IndexedDB MCP",
+      "implementation": "IndexedDB / Native SQLite Bridge",
+      "status": "REGISTERED"
+    }
+  },
+  "stitch_project_id": "10689148469609807449",
+  "status": "VALIDATED",
+  "config_timestamp": "2026-04-13T10:23:00Z"
+}

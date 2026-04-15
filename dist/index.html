@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Cyber-OMR Scanner</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="description" content="Next-gen cyberpunk OMR scanner for high-performance grading.">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <!-- OpenCV.js -->
+    <script async src="https://docs.opencv.org/4.10.0/opencv.js" type="text/javascript"></script>
+</head>
+<body class="cyber-theme">
+
+    <!-- Greeting Header -->
+    <header class="greeting-header">
+        <div class="greeting-info">
+            <h1 id="greeting-text" class="glow-text">Initializing...</h1>
+            <p id="today-date" class="date-subtext"></p>
+        </div>
+        <div class="header-stats">
+            <div class="header-badge">LIVE</div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="app-content">
+        
+        <!-- Scan Tab -->
+        <section id="tab-scan" class="tab-content active">
+            
+            <!-- Dashboard Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card glass">
+                    <span class="stat-val" id="stat-total-scans">0</span>
+                    <span class="stat-label">Today's Scans</span>
+                </div>
+                <div class="stat-card glass">
+                    <span class="stat-val" id="stat-avg-score">0%</span>
+                    <span class="stat-label">Avg. Score</span>
+                </div>
+                <div class="stat-card glass">
+                    <span class="stat-val" id="stat-batches">0</span>
+                    <span class="stat-label">Batches</span>
+                </div>
+            </div>
+
+            <div class="input-group student-id-group glass">
+                <label for="student-id">SYSTEM://STUDENT_ID</label>
+                <input type="text" id="student-id" placeholder="READY FOR INPUT...">
+            </div>
+
+            <!-- ScanBox Component -->
+            <div id="scan-trigger" class="scan-box-container">
+                <div class="scan-box">
+                    <div class="bracket tl"></div>
+                    <div class="bracket tr"></div>
+                    <div class="bracket bl"></div>
+                    <div class="bracket br"></div>
+                    <div class="laser-line"></div>
+                    <div class="scan-content">
+                        <div class="pulse-icon">
+                            <i data-lucide="camera" style="width: 48px; height: 48px;"></i>
+                        </div>
+                        <h2>ACTIVATE SCANNER</h2>
+                        <p>POSITION OMR WITHIN THE RED FRAME</p>
+                    </div>
+                </div>
+            </div>
+
+            <input type="file" id="camera-input" accept="image/*" capture="environment" hidden>
+
+            <div id="preview-container" class="preview-container glass">
+                <img id="image-preview" src="" alt="Captured Image">
+            </div>
+
+            <div id="scan-actions" class="scan-actions">
+                <button id="final-scan-btn" class="btn-cyber-primary">CONFIRM SCAN <i data-lucide="zap"></i></button>
+                <button id="retake-btn" class="btn-cyber-outline">REBOOT CAMERA</button>
+            </div>
+
+            <!-- OpenCV Result Section -->
+            <div id="processing-section" class="processing-section">
+                <div id="spinner" class="cyber-loader"></div>
+                
+                <div id="result-container" class="result-canvas-container" style="display: none;">
+                    <div class="canvas-label">// OPTICAL_VERIFICATION</div>
+                    <canvas id="canvas-original" class="output-canvas"></canvas>
+                    
+                    <div id="image-details" class="image-details glass"></div>
+
+                    <div id="bubble-count-pill" class="image-details glow-red" style="display: none;"></div>
+
+                    <div id="results-mapping" class="results-mapping-container" style="display: none;">
+                        <div class="canvas-label">// DATA_MAPPING</div>
+                        <div id="answers-list" class="answers-list"></div>
+                    </div>
+
+                    <canvas id="canvas-grayscale" class="output-canvas hidden-cv"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Tab -->
+        <section id="tab-results" class="tab-content">
+            <div id="results-target">
+                <div class="card glass empty-state">
+                    <i data-lucide="file-warning"></i>
+                    <h2>NO CACHE DETECTED</h2>
+                    <p>PLEASE PROCESS A SCAN TO GENERATE REPORT</p>
+                </div>
+            </div>
+            <button id="view-history-btn" class="btn-cyber-outline btn-full btn-history-trigger">
+                <i data-lucide="database"></i> ACCESS HISTORICAL CACHE
+            </button>
+        </section>
+
+        <!-- Analytics Tab -->
+        <section id="tab-analytics" class="tab-content">
+            <div class="card glass">
+                <h2 class="glow-text">ANALYTICS://SYSTEM_TRENDS</h2>
+                <div id="analytics-content" class="analytics-grid">
+                    <p class="date-subtext">Calculating Grading Vectors...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Tab -->
+        <section id="tab-settings" class="tab-content">
+            <div id="tab-settings-container">
+                <!-- Injected via app.js -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="cyber-nav">
+        <a href="#" class="nav-item active" data-tab="scan" id="nav-scan">
+            <div class="nav-glow"></div>
+            <i data-lucide="scan"></i>
+            <span>SCAN</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="results" id="nav-results">
+            <div class="nav-glow"></div>
+            <i data-lucide="bar-chart-3"></i>
+            <span>RESULTS</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="analytics" id="nav-analytics">
+            <div class="nav-glow"></div>
+            <i data-lucide="activity"></i>
+            <span>ANALYTICS</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="settings" id="nav-settings">
+            <div class="nav-glow"></div>
+            <i data-lucide="cpu"></i>
+            <span>CONFIG</span>
+        </a>
+    </nav>
+
+    <!-- History Modal -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content glass cyber-border">
+            <div class="modal-header">
+                <h2 class="glow-text">HISTORY://EXAM_DATABASE</h2>
+                <div class="header-actions">
+                    <button id="print-history-btn" class="btn-icon">
+                        <i data-lucide="printer"></i>
+                    </button>
+                    <button id="export-csv-btn" class="btn-icon">
+                        <i data-lucide="download"></i>
+                    </button>
+                    <button id="clear-history-btn" class="btn-icon">
+                        <i data-lucide="shield-alert"></i>
+                    </button>
+                    <button id="close-history" class="btn-close">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="history-container" class="history-container"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
